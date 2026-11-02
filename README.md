@@ -12,7 +12,7 @@ az account set --subscription 2852c4f9-8fcc-47c1-8e96-c4142a9ae463
 .\final-demo.ps1
 ```
 
-Use `.\final-demo.ps1 -Pause` for a presentation. Allow approximately 20-30 minutes: Azure VM Run Command, indexer runs, private-link propagation and audit ingestion are asynchronous. Prerequisites: Windows PowerShell 5.1 or PowerShell 7, Azure CLI, the existing running PoC VM, ARM/Graph read access, VM Run Command permission, Log Analytics query access and the presenter's `KMS.Ingest` / `KMS.Search` gateway roles. The current CLI subscription must match [the configuration](kms-oauth-poc/scripts/kms-poc.config.json).
+Use `.\final-demo.ps1 -Pause` for a presentation. Allow approximately 20-30 minutes: Azure VM Run Command, indexer runs, private-link propagation and audit ingestion are asynchronous. Prerequisites: Windows PowerShell 5.1 or PowerShell 7, Azure CLI, the existing PoC VM, ARM/Graph read access, VM Run Command permission, Log Analytics query access and the presenter's `KMS.Ingest` / `KMS.Search` gateway roles. If the VM is stopped/deallocated, the script requires permission to start it and restore its prior power state. The current CLI subscription must match [the configuration](kms-oauth-poc/scripts/kms-poc.config.json).
 
 The script is the **single entry point**, not a standalone copy: keep the complete repository together. It reuses the existing demo scripts, publisher, policies and synthetic corpus.
 
@@ -29,15 +29,26 @@ The script is the **single entry point**, not a standalone copy: keep the comple
 | 10 | SDK-shaped search/count/indexer-status calls; default-deny for disallowed operations |
 | 11 | Valid public OAuth caller rejected with private-only enabled; private agent retrieval still works |
 | Audit | **Current-run**, resource-scoped accepted/rejected gateway records; Search identity/private embedding calls; publisher OAuth storage access; APIM identity calling OpenAI |
-| Cleanup | Synthetic lifecycle baseline restored; original gateway private-link setting restored and re-read |
+| Cleanup | Synthetic lifecycle baseline restored; original gateway private-link setting restored and re-read; a VM started by the demo returned to its prior power state |
 
 Timestamped scene logs and machine-readable `summary.json` are written under `demo-evidence`, excluded from Git. Missing evidence, assertion failures, terminated scenes and failed cleanup produce **FAIL**, not a reassuring success message. Audit polling defaults to up to 180 seconds; use `-AuditWaitSeconds 600` for a slower workspace. Empty audit tables are not proof.
 
 The consolidated runner has passed PowerShell 5.1 syntax and offline failure-handling/argument-forwarding checks. A fresh live end-to-end acceptance run still requires working Azure connectivity and permission to execute workspace scripts; no successful consolidated live-run result is included in this repository.
 
+### APIM policy preflight failure
+
+Some Azure CLI/Windows combinations fail on APIM policy responses with `Unexpected UTF-8 BOM` or a `charmap` encoding exception. The runner now reads ARM response bytes directly using an in-memory Entra token, explicitly decodes UTF-8 and strips a BOM. It does not depend on `az rest` or the console's code page to read policies. HTTP failures identify the resource, status and ARM error rather than hiding behind a generic CLI failure.
+
+Offline regression checks (no Azure calls):
+
+```powershell
+.\tests\final-demo.tests.ps1
+```
+
 ### Changes made during a run
 
 - Republishes the **15 synthetic PoC articles**, then exercises republish/unpublish on KA-1003 and KA-1012. Finally restores their fixture baseline.
+- Starts the existing dedicated PoC VM if it was stopped/deallocated, then restores that power state on exit. A VM already running is left running. No VM is created; normal compute charges apply while it runs.
 - Temporarily permits **OAuth-authenticated public APIM traffic** so the laptop demos run, then enables private-link-only for its proof. Restores the original switch even after a failure. Do not run if this temporary PoC-only change is not permitted.
 - Never enables Search public access, deploys resources, changes keys/RBAC, or creates certificate/private-key files. Tokens are obtained just-in-time and never intentionally persisted.
 - The SDK default-deny scene uses a nonexistent target for its delete-denial probe; it does not try to delete the actual KMS index.

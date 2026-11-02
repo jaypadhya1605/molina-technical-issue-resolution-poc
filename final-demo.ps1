@@ -6,7 +6,8 @@
     Runs all seven demos, the private VM tests, lifecycle reset, and audit evidence.
     No infrastructure is deployed and no credentials or certificate files are written.
     The gateway's original private-link setting and the synthetic corpus baseline
-    are restored in finally. Search public access is never enabled.
+    are restored in finally. A stopped PoC VM is started for the demo and returned
+    to its original power state. Search public access is never enabled.
     Requires Azure CLI login, ARM/Graph read access, VM Run Command permission,
     Log Analytics query access, and both gateway roles for the presenter.
 .PARAMETER Pause
@@ -37,6 +38,8 @@ $results = New-Object 'System.Collections.Generic.List[object]'
 $originalPrivateLink = $null
 $gatewayChanged = $false
 $baselineTouched = $false
+$vmStarted = $false
+$originalVmPowerState = $null
 $fatal = $null
 $http = $null
 
@@ -78,9 +81,48 @@ function Get-AzureJson {
 
 function Get-Arm {
     param([string]$ResourceId, [string]$Version)
-    Get-AzureJson -Arguments @('rest', '--method', 'get', '--url',
-        "https://management.azure.com$ResourceId`?api-version=$Version",
-        '--subscription', $cfg.subscriptionId)
+    $token = Invoke-Azure -Arguments @('account', 'get-access-token',
+        '--resource', 'https://management.azure.com', '--tenant', $cfg.tenantId,
+        '--query', 'accessToken', '-o', 'tsv')
+    $uri = "https://management.azure.com$ResourceId`?api-version=$Version"
+    $request = New-Object Net.Http.HttpRequestMessage([Net.Http.HttpMethod]::Get, $uri)
+    [void]$request.Headers.TryAddWithoutValidation('Authorization', "Bearer $($token.Trim())")
+    try {
+        try { $response = $http.SendAsync($request).GetAwaiter().GetResult() }
+        catch { throw "ARM GET $ResourceId failed before an HTTP response: $($_.Exception.Message)" }
+        try {
+            # APIM policy responses can include a UTF-8 BOM that az rest cannot decode.
+            $bytes = $response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult()
+            $text = [Text.Encoding]::UTF8.GetString($bytes).TrimStart([char]0xFEFF)
+            if (-not $response.IsSuccessStatusCode) {
+                $detail = $response.ReasonPhrase
+                try {
+                    $errorBody = $text | ConvertFrom-Json -ErrorAction Stop
+                    if ($errorBody.error.code) { $detail += " / $($errorBody.error.code)" }
+                    if ($errorBody.error.message) { $detail += ": $($errorBody.error.message)" }
+                }
+                catch { $detail += ' (response was not valid ARM error JSON)' }
+                throw "ARM GET $ResourceId failed (HTTP $([int]$response.StatusCode)): $detail"
+            }
+            if ([string]::IsNullOrWhiteSpace($text)) { throw "ARM GET $ResourceId returned an empty JSON response." }
+            try { return ($text | ConvertFrom-Json -ErrorAction Stop) }
+            catch { throw "ARM GET $ResourceId returned invalid JSON: $($_.Exception.Message)" }
+        }
+        finally { $response.Dispose() }
+    }
+    finally { $request.Dispose() }
+}
+
+function Set-DemoVmPowerState {
+    param([ValidateSet('running', 'stopped', 'deallocated')][string]$State)
+    $operation = @{ running = 'start'; stopped = 'stop'; deallocated = 'deallocate' }[$State]
+    [void](Invoke-Azure -Arguments @('vm', $operation, '-g', $cfg.resourceGroup,
+        '-n', $cfg.vmName, '--subscription', $cfg.subscriptionId, '-o', 'none'))
+    $view = Get-AzureJson -Arguments @('vm', 'get-instance-view', '-g', $cfg.resourceGroup,
+        '-n', $cfg.vmName, '--subscription', $cfg.subscriptionId)
+    if (@($view.instanceView.statuses | Where-Object code -eq "PowerState/$State").Count -ne 1) {
+        throw "The PoC VM did not reach its requested power state: $State."
+    }
 }
 
 function Invoke-Scene {
@@ -211,6 +253,14 @@ try {
     $current = Get-AzureJson -Arguments @('account', 'show')
     if ($current.id -ne $cfg.subscriptionId) { throw "Select the PoC subscription first: az account set --subscription $($cfg.subscriptionId)" }
     Add-Result 'Preflight/Azure context' $true 'Signed-in subscription and tenant match the PoC.'
+    Add-Type -AssemblyName System.Net.Http
+    [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+    $handler = New-Object Net.Http.HttpClientHandler
+    $handler.AllowAutoRedirect = $false
+    $proxyUrl = @($env:HTTPS_PROXY, $env:HTTP_PROXY) | Where-Object { $_ } | Select-Object -First 1
+    if ($proxyUrl) { $handler.Proxy = New-Object Net.WebProxy($proxyUrl); $handler.UseProxy = $true }
+    $http = New-Object Net.Http.HttpClient($handler)
+    $http.Timeout = [TimeSpan]::FromSeconds(60)
     $vm = Get-Arm "$resourceBase/Microsoft.Compute/virtualMachines/$($cfg.vmName)" '2024-07-01'
     $gateway = Get-Arm "$resourceBase/Microsoft.ApiManagement/service/$($cfg.apimName)" '2024-05-01'
     $search = Get-Arm "$resourceBase/Microsoft.Search/searchServices/$($cfg.searchService)" '2025-05-01'
@@ -246,7 +296,16 @@ try {
         throw 'Search public access must already be Disabled. This script never opens the Search data plane.'
     }
     $state = Get-AzureJson -Arguments @('vm', 'get-instance-view', '-g', $cfg.resourceGroup, '-n', $cfg.vmName)
-    if (@($state.instanceView.statuses | Where-Object code -eq 'PowerState/running').Count -ne 1) { throw 'The demo VM must be running; no VM is started or provisioned automatically.' }
+    $powerStates = @($state.instanceView.statuses | Where-Object { $_.code -like 'PowerState/*' })
+    if ($powerStates.Count -ne 1) { throw 'Could not determine the PoC VM power state.' }
+    $originalVmPowerState = $powerStates[0].code -replace '^PowerState/', ''
+    if ($originalVmPowerState -in @('stopped', 'deallocated')) {
+        Write-Host "The existing PoC VM is $originalVmPowerState; starting it for this demo and restoring that state on exit." -ForegroundColor Yellow
+        $vmStarted = $true
+        Set-DemoVmPowerState 'running'
+    }
+    elseif ($originalVmPowerState -ne 'running') { throw "The PoC VM is transitioning ($originalVmPowerState); wait for that operation to finish and retry." }
+    Add-Result 'Preflight/VM readiness' $true "PoC VM running; original power state=$originalVmPowerState."
     $namedValueId = "$resourceBase/Microsoft.ApiManagement/service/$($cfg.apimName)/namedValues/kms-require-private-link"
     $namedValue = Get-Arm $namedValueId '2024-05-01'
     $originalPrivateLink = [string]$namedValue.properties.value
@@ -288,13 +347,6 @@ private-only operation, and restores the original gateway setting on exit.
     Invoke-Scene '11-Private-only-positive-and-negative-paths' 'Set-PrivateLinkOnly.ps1' @{ State = 'On'; ProveFromVm = $true } @(
         'private_link_required', 'POST /kms/search => HTTP 200', 'trigger ingestion => HTTP 403 insufficient_role') 2
     # Current-run logs must contain records, not merely return HTTP 200 with an empty table.
-    Add-Type -AssemblyName System.Net.Http
-    $handler = New-Object Net.Http.HttpClientHandler
-    $handler.AllowAutoRedirect = $false
-    $proxyUrl = @($env:HTTPS_PROXY, $env:HTTP_PROXY) | Where-Object { $_ } | Select-Object -First 1
-    if ($proxyUrl) { $handler.Proxy = New-Object Net.WebProxy($proxyUrl); $handler.UseProxy = $true }
-    $http = New-Object Net.Http.HttpClient($handler)
-    $http.Timeout = [TimeSpan]::FromSeconds(60)
     Test-LogEvidence
     Invoke-Scene '12-Readable-audit-trail' 'Demo-06-Logs.ps1' @{ Minutes = 120 } @('Azure OpenAI', 'ADLS Gen2', 'embedding calls') 0
 }
@@ -322,6 +374,13 @@ finally {
             }
             catch { Add-Result 'Cleanup/gateway' $false $_.Exception.Message }
         }
+    }
+    if ($vmStarted) {
+        try {
+            Set-DemoVmPowerState $originalVmPowerState
+            Add-Result 'Cleanup/VM power state' $true "PoC VM returned to $originalVmPowerState."
+        }
+        catch { Add-Result 'Cleanup/VM power state' $false $_.Exception.Message }
     }
     if ($http) { $http.Dispose() }
     $failed = @($results | Where-Object result -eq 'FAIL')
