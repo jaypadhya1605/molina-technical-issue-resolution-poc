@@ -1,0 +1,15 @@
+{
+  "name": "kms-adls-articles",
+  "description": "KMS articles published by the KMS app to ADLS Gen2. AI Search connects with its system-assigned managed identity (no keys) over a shared private link.",
+  "type": "adlsgen2",
+  "credentials": {
+    "connectionString": "ResourceId=__STORAGE_ACCOUNT_ID__/;"
+  },
+  "container": {
+    "name": "__CONTAINER_NAME__",
+    "query": "published"
+  },
+  "dataDeletionDetectionPolicy": {
+    "@odata.type": "#Microsoft.Azure.Search.NativeBlobSoftDeleteDeletionDetectionPolicy"
+  }
+}

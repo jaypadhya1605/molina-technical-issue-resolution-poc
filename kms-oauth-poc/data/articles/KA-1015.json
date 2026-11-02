@@ -1,0 +1,33 @@
+{
+  "articleId": "KA-1015",
+  "version": 1,
+  "title": "Prior Authorization Fax Line Update",
+  "status": "out-for-validation",
+  "category": "Utilization Management",
+  "lob": [
+    "Medicaid",
+    "Marketplace"
+  ],
+  "state": [
+    "CA",
+    "TX"
+  ],
+  "effectiveDate": "2026-10-01T00:00:00Z",
+  "expirationDate": "9999-12-31T23:59:59Z",
+  "url": "https://kms.example.internal/articles/KA-1015",
+  "publishedAt": "2026-10-01T00:00:00Z",
+  "chunks": [
+    {
+      "chunkNo": 1,
+      "heading": "Draft change",
+      "text": "DRAFT - Out for Validation. The Utilization Management fax line for imaging requests will move to a new number. Do not share until this article is approved.",
+      "embedText": "Prior Authorization Fax Line Update | Draft change | DRAFT - Out for Validation. The Utilization Management fax line for imaging requests will move to a new number. Do not share until this article is approved."
+    },
+    {
+      "chunkNo": 2,
+      "heading": "Agent guidance",
+      "text": "DRAFT - Out for Validation. Continue to use the fax number on the current quick reference guide.",
+      "embedText": "Prior Authorization Fax Line Update | Agent guidance | DRAFT - Out for Validation. Continue to use the fax number on the current quick reference guide."
+    }
+  ]
+}

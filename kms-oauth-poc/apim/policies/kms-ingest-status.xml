@@ -1,0 +1,50 @@
+<!-- GET /kms/ingest/status : compact view of the AI Search indexer status (last run + recent history + first errors). -->
+<policies>
+  <inbound>
+    <base />
+    <rewrite-uri template="/indexers/__INDEXER_NAME__/status" copy-unmatched-params="false" />
+    <set-query-parameter name="api-version" exists-action="override">
+      <value>__SEARCH_API_VERSION__</value>
+    </set-query-parameter>
+  </inbound>
+  <backend>
+    <base />
+  </backend>
+  <outbound>
+    <base />
+    <choose>
+      <when condition="@(context.Response.StatusCode == 200)">
+        <set-body>@{
+            var r = context.Response.Body.As<JObject>();
+            var history = r["executionHistory"] as JArray ?? new JArray();
+            var runs = new JArray();
+            foreach (var h in history.Take(5)) {
+                var errs = h["errors"] as JArray ?? new JArray();
+                var warns = h["warnings"] as JArray ?? new JArray();
+                runs.Add(new JObject(
+                    new JProperty("status", h["status"]),
+                    new JProperty("startTime", h["startTime"]),
+                    new JProperty("endTime", h["endTime"]),
+                    new JProperty("itemsProcessed", h["itemsProcessed"]),
+                    new JProperty("itemsFailed", h["itemsFailed"]),
+                    new JProperty("errorMessage", h["errorMessage"]),
+                    new JProperty("warningCount", warns.Count),
+                    new JProperty("errors", new JArray(errs.Take(3).Select(e => new JObject(
+                        new JProperty("key", e["key"]),
+                        new JProperty("message", e["errorMessage"])))))
+                ));
+            }
+            return new JObject(
+                new JProperty("indexer", "__INDEXER_NAME__"),
+                new JProperty("indexerStatus", r["status"]),
+                new JProperty("lastRunStatus", r["lastResult"] != null && r["lastResult"].Type != JTokenType.Null ? r["lastResult"]["status"] : null),
+                new JProperty("recentRuns", runs)
+            ).ToString();
+        }</set-body>
+      </when>
+    </choose>
+  </outbound>
+  <on-error>
+    <base />
+  </on-error>
+</policies>

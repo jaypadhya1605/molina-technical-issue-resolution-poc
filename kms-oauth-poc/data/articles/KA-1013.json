@@ -1,0 +1,47 @@
+{
+  "articleId": "KA-1013",
+  "version": 3,
+  "title": "Behavioral Health Crisis: Warm Transfer",
+  "status": "published",
+  "category": "Behavioral Health",
+  "lob": [
+    "Medicaid",
+    "Medicare",
+    "Marketplace",
+    "MMP"
+  ],
+  "state": [
+    "CA",
+    "TX",
+    "FL",
+    "WA",
+    "OH",
+    "MI",
+    "NY",
+    "IL"
+  ],
+  "effectiveDate": "2025-06-01T00:00:00Z",
+  "expirationDate": "9999-12-31T23:59:59Z",
+  "url": "https://kms.example.internal/articles/KA-1013",
+  "publishedAt": "2026-10-01T00:00:00Z",
+  "chunks": [
+    {
+      "chunkNo": 1,
+      "heading": "Recognize a crisis",
+      "text": "If a caller expresses thoughts of harming themselves or others, stay calm and stay on the line. If there is immediate danger, conference in 911. The 988 Suicide and Crisis Lifeline is also available 24/7.",
+      "embedText": "Behavioral Health Crisis: Warm Transfer | Recognize a crisis | If a caller expresses thoughts of harming themselves or others, stay calm and stay on the line. If there is immediate danger, conference in 911. The 988 Suicide and Crisis Lifeline is also available 24/7."
+    },
+    {
+      "chunkNo": 2,
+      "heading": "Warm transfer",
+      "text": "Warm transfer the caller to the behavioral health crisis line and stay on the call until a clinician answers. Never place a caller in crisis on hold or transfer them to voicemail.",
+      "embedText": "Behavioral Health Crisis: Warm Transfer | Warm transfer | Warm transfer the caller to the behavioral health crisis line and stay on the call until a clinician answers. Never place a caller in crisis on hold or transfer them to voicemail."
+    },
+    {
+      "chunkNo": 3,
+      "heading": "Documentation",
+      "text": "Create a behavioral health case in CRM with the minimum necessary information and the time of the transfer. Do not record clinical details beyond what the caller volunteered.",
+      "embedText": "Behavioral Health Crisis: Warm Transfer | Documentation | Create a behavioral health case in CRM with the minimum necessary information and the time of the transfer. Do not record clinical details beyond what the caller volunteered."
+    }
+  ]
+}

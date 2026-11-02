@@ -1,0 +1,42 @@
+{
+  "articleId": "KA-1001",
+  "version": 3,
+  "title": "Prior Authorization for Advanced Imaging (MRI/CT)",
+  "status": "published",
+  "category": "Utilization Management",
+  "lob": [
+    "Medicaid",
+    "Medicare",
+    "Marketplace"
+  ],
+  "state": [
+    "CA",
+    "TX",
+    "WA",
+    "OH"
+  ],
+  "effectiveDate": "2026-01-01T00:00:00Z",
+  "expirationDate": "9999-12-31T23:59:59Z",
+  "url": "https://kms.example.internal/articles/KA-1001",
+  "publishedAt": "2026-10-01T00:00:00Z",
+  "chunks": [
+    {
+      "chunkNo": 1,
+      "heading": "When prior authorization is required",
+      "text": "Outpatient MRI, CT, PET and nuclear cardiology studies require prior authorization (PA) for Medicaid and Marketplace members. Imaging performed in the emergency department or during an inpatient stay does not need PA. Medicare Advantage members need PA only for PET and nuclear cardiology. Always confirm the member's plan before advising the caller.",
+      "embedText": "Prior Authorization for Advanced Imaging (MRI/CT) | When prior authorization is required | Outpatient MRI, CT, PET and nuclear cardiology studies require prior authorization (PA) for Medicaid and Marketplace members. Imaging performed in the emergency department or during an inpatient stay does not need PA. Medicare Advantage members need PA only for PET and nuclear cardiology. Always confirm the member's plan before advising the caller."
+    },
+    {
+      "chunkNo": 2,
+      "heading": "How the provider submits a request",
+      "text": "Providers submit imaging requests through the provider portal or by fax to the Utilization Management fax line on the plan quick reference guide. A complete request includes the ordering provider NPI, CPT codes, ICD-10 diagnosis codes and clinical notes that support medical necessity. Agents must not accept clinical documentation over the phone.",
+      "embedText": "Prior Authorization for Advanced Imaging (MRI/CT) | How the provider submits a request | Providers submit imaging requests through the provider portal or by fax to the Utilization Management fax line on the plan quick reference guide. A complete request includes the ordering provider NPI, CPT codes, ICD-10 diagnosis codes and clinical notes that support medical necessity. Agents must not accept clinical documentation over the phone."
+    },
+    {
+      "chunkNo": 3,
+      "heading": "Turnaround times and status checks",
+      "text": "Standard imaging requests are decided within 3 business days for Marketplace and within 14 calendar days for Medicaid unless the state contract is shorter. Urgent requests are decided within 72 hours. Agents can check status in the UM workspace with the authorization number. If a request is pended for information, tell the caller exactly which document is missing.",
+      "embedText": "Prior Authorization for Advanced Imaging (MRI/CT) | Turnaround times and status checks | Standard imaging requests are decided within 3 business days for Marketplace and within 14 calendar days for Medicaid unless the state contract is shorter. Urgent requests are decided within 72 hours. Agents can check status in the UM workspace with the authorization number. If a request is pended for information, tell the caller exactly which document is missing."
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "name": "__INDEX_NAME__",
+  "fields": [
+    { "name": "chunk_id", "type": "Edm.String", "key": true, "searchable": true, "analyzer": "keyword", "filterable": true, "sortable": true, "facetable": false, "retrievable": true },
+    { "name": "parent_id", "type": "Edm.String", "searchable": false, "filterable": true, "sortable": false, "facetable": false, "retrievable": true },
+    { "name": "article_id", "type": "Edm.String", "searchable": false, "filterable": true, "sortable": true, "facetable": true, "retrievable": true },
+    { "name": "title", "type": "Edm.String", "searchable": true, "filterable": false, "sortable": false, "facetable": false, "retrievable": true, "analyzer": "en.microsoft" },
+    { "name": "heading", "type": "Edm.String", "searchable": true, "filterable": false, "sortable": false, "facetable": false, "retrievable": true, "analyzer": "en.microsoft" },
+    { "name": "content", "type": "Edm.String", "searchable": true, "filterable": false, "sortable": false, "facetable": false, "retrievable": true, "analyzer": "en.microsoft" },
+    { "name": "content_vector", "type": "Collection(Edm.Single)", "searchable": true, "retrievable": false, "stored": true, "dimensions": 3072, "vectorSearchProfile": "kms-vector-profile" },
+    { "name": "category", "type": "Edm.String", "searchable": true, "filterable": true, "sortable": false, "facetable": true, "retrievable": true },
+    { "name": "lob", "type": "Collection(Edm.String)", "searchable": false, "filterable": true, "sortable": false, "facetable": true, "retrievable": true },
+    { "name": "state", "type": "Collection(Edm.String)", "searchable": false, "filterable": true, "sortable": false, "facetable": true, "retrievable": true },
+    { "name": "effective_date", "type": "Edm.DateTimeOffset", "searchable": false, "filterable": true, "sortable": true, "facetable": false, "retrievable": true },
+    { "name": "expiration_date", "type": "Edm.DateTimeOffset", "searchable": false, "filterable": true, "sortable": true, "facetable": false, "retrievable": true },
+    { "name": "status", "type": "Edm.String", "searchable": false, "filterable": true, "sortable": false, "facetable": true, "retrievable": true },
+    { "name": "version", "type": "Edm.Int32", "searchable": false, "filterable": true, "sortable": true, "facetable": true, "retrievable": true },
+    { "name": "chunk_no", "type": "Edm.Int32", "searchable": false, "filterable": true, "sortable": true, "facetable": false, "retrievable": true },
+    { "name": "url", "type": "Edm.String", "searchable": false, "filterable": false, "sortable": false, "facetable": false, "retrievable": true },
+    { "name": "last_published", "type": "Edm.DateTimeOffset", "searchable": false, "filterable": true, "sortable": true, "facetable": false, "retrievable": true },
+    { "name": "source_path", "type": "Edm.String", "searchable": false, "filterable": true, "sortable": false, "facetable": false, "retrievable": true }
+  ],
+  "vectorSearch": {
+    "algorithms": [
+      { "name": "kms-hnsw", "kind": "hnsw", "hnswParameters": { "metric": "cosine", "m": 4, "efConstruction": 400, "efSearch": 500 } }
+    ],
+    "profiles": [
+      { "name": "kms-vector-profile", "algorithm": "kms-hnsw", "vectorizer": "aoai-via-apim" }
+    ],
+    "vectorizers": [
+      {
+        "name": "aoai-via-apim",
+        "kind": "azureOpenAI",
+        "azureOpenAIParameters": {
+          "resourceUri": "__APIM_GATEWAY_URL__",
+          "deploymentId": "__EMBEDDING_DEPLOYMENT__",
+          "modelName": "text-embedding-3-large"
+        }
+      }
+    ]
+  },
+  "semantic": {
+    "defaultConfiguration": "kms-semantic",
+    "configurations": [
+      {
+        "name": "kms-semantic",
+        "prioritizedFields": {
+          "titleField": { "fieldName": "title" },
+          "prioritizedContentFields": [ { "fieldName": "content" } ],
+          "prioritizedKeywordsFields": [ { "fieldName": "heading" }, { "fieldName": "category" } ]
+        }
+      }
+    ]
+  }
+}

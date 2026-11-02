@@ -1,0 +1,47 @@
+{
+  "articleId": "KA-1010",
+  "version": 2,
+  "title": "Interpreter and TTY Services",
+  "status": "published",
+  "category": "Member Services",
+  "lob": [
+    "Medicaid",
+    "Medicare",
+    "Marketplace",
+    "MMP"
+  ],
+  "state": [
+    "CA",
+    "TX",
+    "FL",
+    "WA",
+    "OH",
+    "MI",
+    "NY",
+    "IL"
+  ],
+  "effectiveDate": "2025-01-01T00:00:00Z",
+  "expirationDate": "9999-12-31T23:59:59Z",
+  "url": "https://kms.example.internal/articles/KA-1010",
+  "publishedAt": "2026-10-01T00:00:00Z",
+  "chunks": [
+    {
+      "chunkNo": 1,
+      "heading": "Phone interpreters",
+      "text": "Interpreter services are free for every member in any language. Conference the interpreter vendor line into the call and confirm the member's preferred language in CRM.",
+      "embedText": "Interpreter and TTY Services | Phone interpreters | Interpreter services are free for every member in any language. Conference the interpreter vendor line into the call and confirm the member's preferred language in CRM."
+    },
+    {
+      "chunkNo": 2,
+      "heading": "TTY and relay",
+      "text": "Members who are deaf or hard of hearing can reach us through the 711 relay service. Agents should allow extra time and never hang up on a relay call.",
+      "embedText": "Interpreter and TTY Services | TTY and relay | Members who are deaf or hard of hearing can reach us through the 711 relay service. Agents should allow extra time and never hang up on a relay call."
+    },
+    {
+      "chunkNo": 3,
+      "heading": "Interpreters at appointments",
+      "text": "Members can request a face-to-face or sign language interpreter for a medical appointment. Requests should be made at least 5 business days before the appointment.",
+      "embedText": "Interpreter and TTY Services | Interpreters at appointments | Members can request a face-to-face or sign language interpreter for a medical appointment. Requests should be made at least 5 business days before the appointment."
+    }
+  ]
+}

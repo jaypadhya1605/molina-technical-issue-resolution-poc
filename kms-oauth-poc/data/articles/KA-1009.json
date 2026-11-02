@@ -1,0 +1,46 @@
+{
+  "articleId": "KA-1009",
+  "version": 2,
+  "title": "Telehealth Visits",
+  "status": "published",
+  "category": "Benefits",
+  "lob": [
+    "Medicaid",
+    "Medicare",
+    "Marketplace"
+  ],
+  "state": [
+    "CA",
+    "TX",
+    "FL",
+    "WA",
+    "OH",
+    "MI",
+    "NY",
+    "IL"
+  ],
+  "effectiveDate": "2026-03-01T00:00:00Z",
+  "expirationDate": "9999-12-31T23:59:59Z",
+  "url": "https://kms.example.internal/articles/KA-1009",
+  "publishedAt": "2026-10-01T00:00:00Z",
+  "chunks": [
+    {
+      "chunkNo": 1,
+      "heading": "Covered virtual services",
+      "text": "Members can see a provider by video for primary care, urgent care and behavioral health through the contracted virtual care vendor. Medicaid members have a $0 copay for telehealth visits.",
+      "embedText": "Telehealth Visits | Covered virtual services | Members can see a provider by video for primary care, urgent care and behavioral health through the contracted virtual care vendor. Medicaid members have a $0 copay for telehealth visits."
+    },
+    {
+      "chunkNo": 2,
+      "heading": "How members connect",
+      "text": "Members use the virtual care app or website and sign in with their member ID. Interpreter services are available during the video visit at no cost.",
+      "embedText": "Telehealth Visits | How members connect | Members use the virtual care app or website and sign in with their member ID. Interpreter services are available during the video visit at no cost."
+    },
+    {
+      "chunkNo": 3,
+      "heading": "Limits",
+      "text": "Some services still require an in-person visit, such as physical exams for certain conditions and prescribing of some controlled substances. The virtual provider will refer the member to in-person care when needed.",
+      "embedText": "Telehealth Visits | Limits | Some services still require an in-person visit, such as physical exams for certain conditions and prescribing of some controlled substances. The virtual provider will refer the member to in-person care when needed."
+    }
+  ]
+}

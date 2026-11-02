@@ -1,0 +1,45 @@
+{
+  "articleId": "KA-1002",
+  "version": 2,
+  "title": "Member Address Change",
+  "status": "published",
+  "category": "Member Services",
+  "lob": [
+    "Medicaid",
+    "Marketplace"
+  ],
+  "state": [
+    "CA",
+    "TX",
+    "FL",
+    "WA",
+    "OH",
+    "MI",
+    "NY",
+    "IL"
+  ],
+  "effectiveDate": "2025-07-01T00:00:00Z",
+  "expirationDate": "9999-12-31T23:59:59Z",
+  "url": "https://kms.example.internal/articles/KA-1002",
+  "publishedAt": "2026-10-01T00:00:00Z",
+  "chunks": [
+    {
+      "chunkNo": 1,
+      "heading": "Verify the caller first",
+      "text": "Before changing any demographic data, verify the caller with full name, date of birth, member ID and one additional identifier such as the address on file. If the caller is not the member, confirm an authorized representative form is on file.",
+      "embedText": "Member Address Change | Verify the caller first | Before changing any demographic data, verify the caller with full name, date of birth, member ID and one additional identifier such as the address on file. If the caller is not the member, confirm an authorized representative form is on file."
+    },
+    {
+      "chunkNo": 2,
+      "heading": "Medicaid members",
+      "text": "For Medicaid members the state Medicaid agency is the source of truth for address. Update the mailing address in CRM so letters reach the member, and tell the member they must also report the change to the state agency. The state enrollment file will overwrite our record if the state is not updated.",
+      "embedText": "Member Address Change | Medicaid members | For Medicaid members the state Medicaid agency is the source of truth for address. Update the mailing address in CRM so letters reach the member, and tell the member they must also report the change to the state agency. The state enrollment file will overwrite our record if the state is not updated."
+    },
+    {
+      "chunkNo": 3,
+      "heading": "Marketplace members",
+      "text": "Marketplace members must report the new address to the exchange (HealthCare.gov or the state exchange). A move to a different county or state can change plan eligibility, so advise the member that a special enrollment period may apply. Offer to reissue the ID card after the address is updated.",
+      "embedText": "Member Address Change | Marketplace members | Marketplace members must report the new address to the exchange (HealthCare.gov or the state exchange). A move to a different county or state can change plan eligibility, so advise the member that a special enrollment period may apply. Offer to reissue the ID card after the address is updated."
+    }
+  ]
+}

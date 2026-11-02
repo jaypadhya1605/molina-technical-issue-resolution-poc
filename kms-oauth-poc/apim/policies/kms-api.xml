@@ -1,0 +1,104 @@
+<!--
+  API: kms  (path /kms)  - curated, least-privilege KMS API in front of Azure AI Search
+  Callers: KMS publisher (app role KMS.Ingest), support-center agent app (app role KMS.Search), named users.
+  1. OAuth: every call must carry an Entra ID access token for the KMS gateway app registration.
+  2. Authorization: app roles in the token are checked per operation (403 if the role is missing).
+  3. Optional switch: require traffic to arrive through the APIM private endpoint (named value kms-require-private-link).
+  4. Credential termination: APIM calls AI Search with its OWN managed identity (Search keys are disabled).
+-->
+<policies>
+  <inbound>
+    <base />
+    <validate-azure-ad-token tenant-id="__TENANT_ID__" header-name="Authorization" failed-validation-httpcode="401" failed-validation-error-message="Unauthorized. Present an Entra ID access token issued for the KMS gateway API (api://__GATEWAY_APP_ID__)." output-token-variable-name="jwt">
+      <audiences>
+        <audience>__GATEWAY_APP_ID__</audience>
+        <audience>api://__GATEWAY_APP_ID__</audience>
+      </audiences>
+    </validate-azure-ad-token>
+    <set-variable name="callerRoles" value="@(((Jwt)context.Variables["jwt"]).Claims.GetValueOrDefault("roles", ""))" />
+    <trace source="kms-audit" severity="information">
+      <message>@{
+          var jwt = (Jwt)context.Variables["jwt"];
+          return new JObject(
+              new JProperty("event", "kms-call"),
+              new JProperty("operation", context.Operation.Id),
+              new JProperty("callerObjectId", jwt.Claims.GetValueOrDefault("oid", "")),
+              new JProperty("callerAppId", jwt.Claims.GetValueOrDefault("azp", jwt.Claims.GetValueOrDefault("appid", ""))),
+              new JProperty("callerName", jwt.Claims.GetValueOrDefault("name", "")),
+              new JProperty("roles", (string)context.Variables["callerRoles"]),
+              new JProperty("viaPrivateEndpoint", context.Request.PrivateEndpointConnection != null)
+          ).ToString(Newtonsoft.Json.Formatting.None);
+      }</message>
+    </trace>
+    <set-variable name="requiredRoles" value="@{
+        switch (context.Operation.Id) {
+            case "search":
+            case "article-chunks":
+            case "stats":
+                return "KMS.Search";
+            case "ingest-run":
+                return "KMS.Ingest";
+            case "ingest-status":
+                return "KMS.Search,KMS.Ingest";
+            default:
+                return "";
+        }
+    }" />
+    <choose>
+      <when condition="@{
+          var required = ((string)context.Variables["requiredRoles"]).Split(new [] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+          if (required.Length == 0) { return false; }
+          var have = ((string)context.Variables["callerRoles"]).Split(new [] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(r => r.Trim()).ToArray();
+          return !required.Any(r => have.Contains(r));
+      }">
+        <return-response>
+          <set-status code="403" reason="Forbidden" />
+          <set-header name="Content-Type" exists-action="override">
+            <value>application/json</value>
+          </set-header>
+          <set-body>@(new JObject(
+              new JProperty("error", "insufficient_role"),
+              new JProperty("operation", context.Operation.Id),
+              new JProperty("requiredAnyOf", (string)context.Variables["requiredRoles"]),
+              new JProperty("callerRoles", (string)context.Variables["callerRoles"]),
+              new JProperty("callerObjectId", ((Jwt)context.Variables["jwt"]).Claims.GetValueOrDefault("oid", "")),
+              new JProperty("requestId", context.RequestId.ToString())
+          ).ToString())</set-body>
+        </return-response>
+      </when>
+      <when condition="@("{{kms-require-private-link}}".Equals("true", StringComparison.OrdinalIgnoreCase) && context.Request.PrivateEndpointConnection == null)">
+        <return-response>
+          <set-status code="403" reason="Forbidden" />
+          <set-header name="Content-Type" exists-action="override">
+            <value>application/json</value>
+          </set-header>
+          <set-body>@(new JObject(
+              new JProperty("error", "private_link_required"),
+              new JProperty("message", "This API only accepts traffic that arrives through the API Management private endpoint."),
+              new JProperty("clientIp", context.Request.IpAddress),
+              new JProperty("requestId", context.RequestId.ToString())
+          ).ToString())</set-body>
+        </return-response>
+      </when>
+    </choose>
+    <authentication-managed-identity resource="https://search.azure.com" />
+  </inbound>
+  <backend>
+    <base />
+  </backend>
+  <outbound>
+    <base />
+    <set-header name="x-kms-gateway" exists-action="override">
+      <value>azure-api-management</value>
+    </set-header>
+    <set-header name="x-kms-request-id" exists-action="override">
+      <value>@(context.RequestId.ToString())</value>
+    </set-header>
+  </outbound>
+  <on-error>
+    <base />
+    <set-header name="x-kms-request-id" exists-action="override">
+      <value>@(context.RequestId.ToString())</value>
+    </set-header>
+  </on-error>
+</policies>

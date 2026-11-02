@@ -1,0 +1,46 @@
+{
+  "articleId": "KA-1014",
+  "version": 2,
+  "title": "Replacement Member ID Card",
+  "status": "published",
+  "category": "Member Services",
+  "lob": [
+    "Medicaid",
+    "Medicare",
+    "Marketplace"
+  ],
+  "state": [
+    "CA",
+    "TX",
+    "FL",
+    "WA",
+    "OH",
+    "MI",
+    "NY",
+    "IL"
+  ],
+  "effectiveDate": "2025-08-01T00:00:00Z",
+  "expirationDate": "9999-12-31T23:59:59Z",
+  "url": "https://kms.example.internal/articles/KA-1014",
+  "publishedAt": "2026-10-01T00:00:00Z",
+  "chunks": [
+    {
+      "chunkNo": 1,
+      "heading": "Before ordering",
+      "text": "Verify the caller and confirm the mailing address. If the address changed, follow KA-1002 Member Address Change before ordering the card.",
+      "embedText": "Replacement Member ID Card | Before ordering | Verify the caller and confirm the mailing address. If the address changed, follow KA-1002 Member Address Change before ordering the card."
+    },
+    {
+      "chunkNo": 2,
+      "heading": "Ordering the card",
+      "text": "Order the replacement card in CRM. It arrives in 7 to 10 business days. A digital ID card is available immediately in the member app and can be shown at the pharmacy or doctor office.",
+      "embedText": "Replacement Member ID Card | Ordering the card | Order the replacement card in CRM. It arrives in 7 to 10 business days. A digital ID card is available immediately in the member app and can be shown at the pharmacy or doctor office."
+    },
+    {
+      "chunkNo": 3,
+      "heading": "Temporary proof of coverage",
+      "text": "If the member needs proof of coverage today, email or mail a temporary ID letter from CRM. Providers can also verify eligibility in the provider portal.",
+      "embedText": "Replacement Member ID Card | Temporary proof of coverage | If the member needs proof of coverage today, email or mail a temporary ID letter from CRM. Providers can also verify eligibility in the provider portal."
+    }
+  ]
+}

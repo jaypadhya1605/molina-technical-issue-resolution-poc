@@ -1,0 +1,41 @@
+<!-- GET /kms/stats : index inventory (total chunks, chunks per article, status/LOB/state facets). -->
+<policies>
+  <inbound>
+    <base />
+    <set-method>POST</set-method>
+    <set-header name="Content-Type" exists-action="override">
+      <value>application/json</value>
+    </set-header>
+    <set-body>{"search":"*","count":true,"top":0,"facets":["article_id,count:100,sort:value","status","category,count:20","lob","state,count:60"]}</set-body>
+    <rewrite-uri template="/indexes/__INDEX_NAME__/docs/search" copy-unmatched-params="false" />
+    <set-query-parameter name="api-version" exists-action="override">
+      <value>__SEARCH_API_VERSION__</value>
+    </set-query-parameter>
+  </inbound>
+  <backend>
+    <base />
+  </backend>
+  <outbound>
+    <base />
+    <choose>
+      <when condition="@(context.Response.StatusCode == 200)">
+        <set-body>@{
+            var r = context.Response.Body.As<JObject>();
+            var facets = (JObject)r["@search.facets"];
+            var result = new JObject(
+                new JProperty("index", "__INDEX_NAME__"),
+                new JProperty("totalChunks", r["@odata.count"]));
+            foreach (var f in facets.Properties()) {
+                var o = new JObject();
+                foreach (var v in (JArray)f.Value) { o.Add(new JProperty((string)v["value"], v["count"])); }
+                result.Add(new JProperty(f.Name == "article_id" ? "chunksPerArticle" : f.Name, o));
+            }
+            return result.ToString();
+        }</set-body>
+      </when>
+    </choose>
+  </outbound>
+  <on-error>
+    <base />
+  </on-error>
+</policies>

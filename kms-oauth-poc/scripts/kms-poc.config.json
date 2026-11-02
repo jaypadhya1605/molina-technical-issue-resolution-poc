@@ -1,0 +1,33 @@
+{
+  "subscriptionId": "2852c4f9-8fcc-47c1-8e96-c4142a9ae463",
+  "tenantId": "16b3c013-d300-468d-ac64-7eda0820b6d3",
+  "resourceGroup": "rg-molina-kms-search-oauth-poc-scus",
+  "location": "southcentralus",
+  "storageAccount": "stkmspoczenrt",
+  "container": "kms-articles",
+  "searchService": "srch-kms-poc-zenrt",
+  "searchApiVersion": "2025-09-01",
+  "searchMiAppId": "e1ad8b1c-b545-43f8-81c2-24888c2b5865",
+  "dataSourceName": "kms-adls-articles",
+  "indexName": "kms-knowledge-v2",
+  "skillsetName": "kms-skillset",
+  "indexerName": "kms-articles-indexer",
+  "aoaiName": "aoai-kms-poc-zenrt",
+  "embeddingDeployment": "text-embedding-3-large",
+  "apimName": "apim-kms-poc-zenrt",
+  "apimGateway": "https://apim-kms-poc-zenrt.azure-api.net",
+  "gatewayAppId": "4ef59d54-4c7f-48cb-9f14-cbf8ebd07652",
+  "gatewayAudience": "api://4ef59d54-4c7f-48cb-9f14-cbf8ebd07652",
+  "gatewaySpObjectId": "9253a056-7d5e-4bb5-8c39-d44d23670eb2",
+  "agentClientId": "08d87a06-cb7a-4488-b203-913e76364c54",
+  "principals": {
+    "ff86d80c-744a-48f7-b03b-c68baa837ff7": "srch-kms-poc-zenrt (AI Search system MI)",
+    "74f4d69f-8dc2-44f5-b73e-8bcc7799104f": "apim-kms-poc-zenrt (APIM system MI)",
+    "a317457b-f4f9-42cc-825e-1eb7b9bff3f1": "vm-kms-app (KMS publisher system MI)",
+    "d40cca0b-47a7-4077-b730-a50b59f0ed67": "id-kms-agent-app (agent app user-assigned MI)",
+    "2b8ea1b5-28b1-4f81-8b29-2a72e3373890": "Jay Padhya (presenter)"
+  },
+  "vmName": "vm-kms-app",
+  "logAnalyticsWorkspace": "log-kms-poc-zenrt",
+  "logAnalyticsCustomerId": "c1f11cf9-da81-4538-a89c-7b02cd75759c"
+}

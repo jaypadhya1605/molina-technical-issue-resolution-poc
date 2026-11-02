@@ -1,0 +1,45 @@
+{
+  "articleId": "KA-1008",
+  "version": 2,
+  "title": "Newborn Enrollment",
+  "status": "published",
+  "category": "Eligibility",
+  "lob": [
+    "Medicaid",
+    "Marketplace"
+  ],
+  "state": [
+    "CA",
+    "TX",
+    "FL",
+    "WA",
+    "OH",
+    "MI",
+    "NY",
+    "IL"
+  ],
+  "effectiveDate": "2025-05-01T00:00:00Z",
+  "expirationDate": "9999-12-31T23:59:59Z",
+  "url": "https://kms.example.internal/articles/KA-1008",
+  "publishedAt": "2026-10-01T00:00:00Z",
+  "chunks": [
+    {
+      "chunkNo": 1,
+      "heading": "Medicaid newborns",
+      "text": "A baby born to a mother enrolled in Medicaid is deemed eligible for 12 months. The hospital or the mother reports the birth to the state, and the newborn appears on the state enrollment file.",
+      "embedText": "Newborn Enrollment | Medicaid newborns | A baby born to a mother enrolled in Medicaid is deemed eligible for 12 months. The hospital or the mother reports the birth to the state, and the newborn appears on the state enrollment file."
+    },
+    {
+      "chunkNo": 2,
+      "heading": "Marketplace newborns",
+      "text": "Marketplace members must add the newborn through the exchange within 60 days of birth. Coverage is retroactive to the date of birth once the first premium is paid.",
+      "embedText": "Newborn Enrollment | Marketplace newborns | Marketplace members must add the newborn through the exchange within 60 days of birth. Coverage is retroactive to the date of birth once the first premium is paid."
+    },
+    {
+      "chunkNo": 3,
+      "heading": "Claims before the ID card arrives",
+      "text": "Claims for newborn services in the first 30 days may be billed under the mother's member ID where state rules allow. Tell providers to resubmit under the newborn's ID once it is assigned.",
+      "embedText": "Newborn Enrollment | Claims before the ID card arrives | Claims for newborn services in the first 30 days may be billed under the mother's member ID where state rules allow. Tell providers to resubmit under the newborn's ID once it is assigned."
+    }
+  ]
+}

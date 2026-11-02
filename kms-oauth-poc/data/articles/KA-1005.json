@@ -1,0 +1,44 @@
+{
+  "articleId": "KA-1005",
+  "version": 2,
+  "title": "Specialty Pharmacy Referrals",
+  "status": "published",
+  "category": "Pharmacy",
+  "lob": [
+    "Medicaid",
+    "Medicare",
+    "Marketplace"
+  ],
+  "state": [
+    "CA",
+    "TX",
+    "FL",
+    "WA",
+    "OH",
+    "MI"
+  ],
+  "effectiveDate": "2026-02-01T00:00:00Z",
+  "expirationDate": "9999-12-31T23:59:59Z",
+  "url": "https://kms.example.internal/articles/KA-1005",
+  "publishedAt": "2026-10-01T00:00:00Z",
+  "chunks": [
+    {
+      "chunkNo": 1,
+      "heading": "Which drugs are specialty",
+      "text": "Specialty drugs include biologics, oral oncology drugs, hepatitis C treatments and other high-cost medications marked tier S on the formulary. They must be filled by the contracted specialty pharmacy, not a retail pharmacy.",
+      "embedText": "Specialty Pharmacy Referrals | Which drugs are specialty | Specialty drugs include biologics, oral oncology drugs, hepatitis C treatments and other high-cost medications marked tier S on the formulary. They must be filled by the contracted specialty pharmacy, not a retail pharmacy."
+    },
+    {
+      "chunkNo": 2,
+      "heading": "Transferring the member",
+      "text": "Warm transfer the member to the specialty pharmacy intake line and stay on until intake answers. Provide the member ID, drug name and prescriber name. The specialty pharmacy coordinates delivery and refill reminders.",
+      "embedText": "Specialty Pharmacy Referrals | Transferring the member | Warm transfer the member to the specialty pharmacy intake line and stay on until intake answers. Provide the member ID, drug name and prescriber name. The specialty pharmacy coordinates delivery and refill reminders."
+    },
+    {
+      "chunkNo": 3,
+      "heading": "Prior authorization",
+      "text": "Most specialty drugs require prior authorization. If the claim rejects for PA, explain that the prescriber must submit the request and offer to send the PA fax form to the prescriber's office.",
+      "embedText": "Specialty Pharmacy Referrals | Prior authorization | Most specialty drugs require prior authorization. If the claim rejects for PA, explain that the prescriber must submit the request and offer to send the PA fax form to the prescriber's office."
+    }
+  ]
+}

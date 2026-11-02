@@ -1,0 +1,145 @@
+<!--
+  API: aisearch  (path /aisearch)  - drop-in Azure AI Search endpoint for existing SDK clients (azure-search-documents)
+  The Python support-center app keeps its SearchClient code; it only changes the endpoint to APIM and uses an Entra token.
+  Allow-list (everything else = 403):
+    POST  /indexes('<index>')/docs/search.post.search  or /indexes/<index>/docs/search   -> KMS.Search (+ published-only guardrail)
+    GET   /indexes('<index>')/docs/$count                                                -> KMS.Search
+    POST  /indexers('<indexer>')/search.run              or /indexers/<indexer>/run      -> KMS.Ingest
+    GET   /indexers('<indexer>')/search.status           or /indexers/<indexer>/status   -> KMS.Search or KMS.Ingest
+-->
+<policies>
+  <inbound>
+    <base />
+    <validate-azure-ad-token tenant-id="__TENANT_ID__" header-name="Authorization" failed-validation-httpcode="401" failed-validation-error-message="Unauthorized. Present an Entra ID access token issued for the KMS gateway API (api://__GATEWAY_APP_ID__)." output-token-variable-name="jwt">
+      <audiences>
+        <audience>__GATEWAY_APP_ID__</audience>
+        <audience>api://__GATEWAY_APP_ID__</audience>
+      </audiences>
+    </validate-azure-ad-token>
+    <set-variable name="relPath" value="@{
+        var p = System.Net.WebUtility.UrlDecode(context.Request.OriginalUrl.Path);
+        var marker = "/" + context.Api.Path.Trim('/');
+        var i = p.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        return i >= 0 ? p.Substring(i + marker.Length) : p;
+    }" />
+    <set-variable name="opKind" value="@{
+        var p = (string)context.Variables["relPath"];
+        var m = context.Request.Method;
+        var idx = "(\\('__INDEX_NAME__'\\)|/__INDEX_NAME__)";
+        var ixr = "(\\('__INDEXER_NAME__'\\)|/__INDEXER_NAME__)";
+        if (m == "POST" && Regex.IsMatch(p, "^/indexes" + idx + "/docs(/search\\.post\\.search|/search)$")) { return "search"; }
+        if (m == "GET" && Regex.IsMatch(p, "^/indexes" + idx + "/docs/\\$count$")) { return "count"; }
+        if (m == "POST" && Regex.IsMatch(p, "^/indexers" + ixr + "/(search\\.run|run)$")) { return "indexer-run"; }
+        if (m == "GET" && Regex.IsMatch(p, "^/indexers" + ixr + "/(search\\.status|status)$")) { return "indexer-status"; }
+        return "denied";
+    }" />
+    <set-variable name="requiredRoles" value="@{
+        switch ((string)context.Variables["opKind"]) {
+            case "search":
+            case "count":
+                return "KMS.Search";
+            case "indexer-run":
+                return "KMS.Ingest";
+            case "indexer-status":
+                return "KMS.Search,KMS.Ingest";
+            default:
+                return "";
+        }
+    }" />
+    <set-variable name="callerRoles" value="@(((Jwt)context.Variables["jwt"]).Claims.GetValueOrDefault("roles", ""))" />
+    <trace source="kms-audit" severity="information">
+      <message>@{
+          var jwt = (Jwt)context.Variables["jwt"];
+          return new JObject(
+              new JProperty("event", "aisearch-call"),
+              new JProperty("operation", (string)context.Variables["opKind"]),
+              new JProperty("callerObjectId", jwt.Claims.GetValueOrDefault("oid", "")),
+              new JProperty("callerAppId", jwt.Claims.GetValueOrDefault("azp", jwt.Claims.GetValueOrDefault("appid", ""))),
+              new JProperty("callerName", jwt.Claims.GetValueOrDefault("name", "")),
+              new JProperty("roles", (string)context.Variables["callerRoles"]),
+              new JProperty("viaPrivateEndpoint", context.Request.PrivateEndpointConnection != null)
+          ).ToString(Newtonsoft.Json.Formatting.None);
+      }</message>
+    </trace>
+    <choose>
+      <when condition="@((string)context.Variables["opKind"] == "denied")">
+        <return-response>
+          <set-status code="403" reason="Forbidden" />
+          <set-header name="Content-Type" exists-action="override">
+            <value>application/json</value>
+          </set-header>
+          <set-body>@(new JObject(
+              new JProperty("error", "operation_not_allowed"),
+              new JProperty("method", context.Request.Method),
+              new JProperty("path", (string)context.Variables["relPath"]),
+              new JProperty("message", "Only query, count, indexer run and indexer status on the KMS index are exposed through the gateway. Index, skillset and key management are not."),
+              new JProperty("requestId", context.RequestId.ToString())
+          ).ToString())</set-body>
+        </return-response>
+      </when>
+      <when condition="@{
+          var required = ((string)context.Variables["requiredRoles"]).Split(',');
+          var have = ((string)context.Variables["callerRoles"]).Split(',').Select(r => r.Trim()).ToArray();
+          return !required.Any(r => have.Contains(r));
+      }">
+        <return-response>
+          <set-status code="403" reason="Forbidden" />
+          <set-header name="Content-Type" exists-action="override">
+            <value>application/json</value>
+          </set-header>
+          <set-body>@(new JObject(
+              new JProperty("error", "insufficient_role"),
+              new JProperty("operation", (string)context.Variables["opKind"]),
+              new JProperty("requiredAnyOf", (string)context.Variables["requiredRoles"]),
+              new JProperty("callerRoles", (string)context.Variables["callerRoles"]),
+              new JProperty("requestId", context.RequestId.ToString())
+          ).ToString())</set-body>
+        </return-response>
+      </when>
+      <when condition="@("{{kms-require-private-link}}".Equals("true", StringComparison.OrdinalIgnoreCase) && context.Request.PrivateEndpointConnection == null)">
+        <return-response>
+          <set-status code="403" reason="Forbidden" />
+          <set-header name="Content-Type" exists-action="override">
+            <value>application/json</value>
+          </set-header>
+          <set-body>{"error":"private_link_required","message":"This API only accepts traffic that arrives through the API Management private endpoint."}</set-body>
+        </return-response>
+      </when>
+      <when condition="@((string)context.Variables["opKind"] == "search")">
+        <set-variable name="nowUtc" value="@(DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"))" />
+        <set-variable name="guardrail" value="@("status eq 'published' and effective_date le " + (string)context.Variables["nowUtc"] + " and (expiration_date eq null or expiration_date gt " + (string)context.Variables["nowUtc"] + ")")" />
+        <set-body>@{
+            var body = context.Request.Body.As<JObject>(preserveContent: true) ?? new JObject();
+            var userFilter = (string)body["filter"];
+            var guard = (string)context.Variables["guardrail"];
+            body["filter"] = string.IsNullOrWhiteSpace(userFilter) ? guard : "(" + userFilter + ") and " + guard;
+            return body.ToString();
+        }</set-body>
+      </when>
+    </choose>
+    <set-header name="api-key" exists-action="delete" />
+    <authentication-managed-identity resource="https://search.azure.com" />
+  </inbound>
+  <backend>
+    <base />
+  </backend>
+  <outbound>
+    <base />
+    <set-header name="x-kms-gateway" exists-action="override">
+      <value>azure-api-management</value>
+    </set-header>
+    <set-header name="x-kms-request-id" exists-action="override">
+      <value>@(context.RequestId.ToString())</value>
+    </set-header>
+    <choose>
+      <when condition="@(context.Variables.ContainsKey("guardrail"))">
+        <set-header name="x-kms-guardrail" exists-action="override">
+          <value>@((string)context.Variables["guardrail"])</value>
+        </set-header>
+      </when>
+    </choose>
+  </outbound>
+  <on-error>
+    <base />
+  </on-error>
+</policies>

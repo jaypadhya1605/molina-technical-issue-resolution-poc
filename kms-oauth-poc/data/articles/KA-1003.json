@@ -1,0 +1,47 @@
+{
+  "articleId": "KA-1003",
+  "version": 3,
+  "title": "Non-Emergency Medical Transportation (NEMT)",
+  "status": "published",
+  "category": "Benefits",
+  "lob": [
+    "Medicaid"
+  ],
+  "state": [
+    "TX",
+    "CA",
+    "FL",
+    "OH",
+    "MI"
+  ],
+  "effectiveDate": "2025-01-01T00:00:00Z",
+  "expirationDate": "9999-12-31T23:59:59Z",
+  "url": "https://kms.example.internal/articles/KA-1003",
+  "publishedAt": "2026-10-01T00:00:00Z",
+  "chunks": [
+    {
+      "chunkNo": 1,
+      "heading": "Who is eligible",
+      "text": "Medicaid members who have no other way to get to a covered medical appointment can use non-emergency medical transportation at no cost. This includes rides to dialysis, behavioral health visits, pharmacy pickups after a visit and other covered services.",
+      "embedText": "Non-Emergency Medical Transportation (NEMT) | Who is eligible | Medicaid members who have no other way to get to a covered medical appointment can use non-emergency medical transportation at no cost. This includes rides to dialysis, behavioral health visits, pharmacy pickups after a visit and other covered services."
+    },
+    {
+      "chunkNo": 2,
+      "heading": "Scheduling a ride",
+      "text": "Rides must be scheduled at least 2 business days before the appointment through the transportation vendor line. Same-day rides are allowed for hospital discharges and urgent appointments. Standing orders can be set up for recurring treatments such as dialysis or chemotherapy.",
+      "embedText": "Non-Emergency Medical Transportation (NEMT) | Scheduling a ride | Rides must be scheduled at least 2 business days before the appointment through the transportation vendor line. Same-day rides are allowed for hospital discharges and urgent appointments. Standing orders can be set up for recurring treatments such as dialysis or chemotherapy."
+    },
+    {
+      "chunkNo": 3,
+      "heading": "Mileage reimbursement",
+      "text": "Members who drive themselves or get a ride from a friend or family member can be reimbursed for mileage at the state rate. The member must submit a trip log signed by the provider office within 90 days of the appointment.",
+      "embedText": "Non-Emergency Medical Transportation (NEMT) | Mileage reimbursement | Members who drive themselves or get a ride from a friend or family member can be reimbursed for mileage at the state rate. The member must submit a trip log signed by the provider office within 90 days of the appointment."
+    },
+    {
+      "chunkNo": 4,
+      "heading": "Complaints and no-shows",
+      "text": "If the driver did not arrive or the member was late to an appointment, log a complaint in CRM with category Transportation. The transportation vendor must respond within 24 hours. Repeated no-shows are escalated to the vendor manager.",
+      "embedText": "Non-Emergency Medical Transportation (NEMT) | Complaints and no-shows | If the driver did not arrive or the member was late to an appointment, log a complaint in CRM with category Transportation. The transportation vendor must respond within 24 hours. Repeated no-shows are escalated to the vendor manager."
+    }
+  ]
+}

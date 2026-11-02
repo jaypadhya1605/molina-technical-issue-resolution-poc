@@ -1,0 +1,47 @@
+<!-- GET /kms/whoami : echoes what the gateway verified in the caller's OAuth token (no backend call). -->
+<policies>
+  <inbound>
+    <base />
+    <return-response>
+      <set-status code="200" reason="OK" />
+      <set-header name="Content-Type" exists-action="override">
+        <value>application/json</value>
+      </set-header>
+      <set-body>@{
+          var jwt = (Jwt)context.Variables["jwt"];
+          var azp = jwt.Claims.GetValueOrDefault("azp", "");
+          var scp = jwt.Claims.GetValueOrDefault("scp", "");
+          var name = jwt.Claims.GetValueOrDefault("name", "");
+          if (name == "") { name = jwt.Claims.GetValueOrDefault("preferred_username", ""); }
+          var pec = context.Request.PrivateEndpointConnection;
+          return new JObject(
+              new JProperty("gateway", context.Deployment.ServiceName),
+              new JProperty("validatedBy", "validate-azure-ad-token (Microsoft Entra ID, OAuth 2.0)"),
+              new JProperty("tokenVersion", jwt.Claims.GetValueOrDefault("ver", "")),
+              new JProperty("issuer", jwt.Issuer),
+              new JProperty("audience", string.Join(",", jwt.Audiences)),
+              new JProperty("callerType", scp != "" ? "user (delegated)" : "workload (app-only / managed identity)"),
+              new JProperty("callerName", name),
+              new JProperty("callerObjectId", jwt.Claims.GetValueOrDefault("oid", "")),
+              new JProperty("callerAppId", azp != "" ? azp : jwt.Claims.GetValueOrDefault("appid", "")),
+              new JProperty("delegatedScopes", scp),
+              new JProperty("appRoles", jwt.Claims.GetValueOrDefault("roles", "")),
+              new JProperty("tokenExpiresUtc", jwt.ExpirationTime.HasValue ? jwt.ExpirationTime.Value.ToString("o") : ""),
+              new JProperty("viaPrivateEndpoint", pec != null),
+              new JProperty("privateEndpointConnection", pec != null ? pec.Name : ""),
+              new JProperty("clientIp", context.Request.IpAddress),
+              new JProperty("requestId", context.RequestId.ToString())
+          ).ToString();
+      }</set-body>
+    </return-response>
+  </inbound>
+  <backend>
+    <base />
+  </backend>
+  <outbound>
+    <base />
+  </outbound>
+  <on-error>
+    <base />
+  </on-error>
+</policies>

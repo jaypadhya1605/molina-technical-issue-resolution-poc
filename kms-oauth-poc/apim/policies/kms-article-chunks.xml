@@ -1,0 +1,69 @@
+<!-- GET /kms/articles/{articleId}/chunks : every chunk currently in the index for one article (proves republish/unpublish cleanup). -->
+<policies>
+  <inbound>
+    <base />
+    <choose>
+      <when condition="@(!Regex.IsMatch(context.Request.MatchedParameters["articleId"], "^[A-Za-z0-9-]{1,40}$"))">
+        <return-response>
+          <set-status code="400" reason="Bad Request" />
+          <set-header name="Content-Type" exists-action="override">
+            <value>application/json</value>
+          </set-header>
+          <set-body>{"error":"invalid_article_id"}</set-body>
+        </return-response>
+      </when>
+    </choose>
+    <set-method>POST</set-method>
+    <set-header name="Content-Type" exists-action="override">
+      <value>application/json</value>
+    </set-header>
+    <set-body>@(new JObject(
+        new JProperty("search", "*"),
+        new JProperty("filter", "article_id eq '" + context.Request.MatchedParameters["articleId"] + "'"),
+        new JProperty("orderby", "chunk_no asc"),
+        new JProperty("select", "chunk_id,parent_id,article_id,title,version,status,chunk_no,heading,last_published"),
+        new JProperty("count", true),
+        new JProperty("top", 100)
+    ).ToString())</set-body>
+    <rewrite-uri template="/indexes/__INDEX_NAME__/docs/search" copy-unmatched-params="false" />
+    <set-query-parameter name="api-version" exists-action="override">
+      <value>__SEARCH_API_VERSION__</value>
+    </set-query-parameter>
+  </inbound>
+  <backend>
+    <base />
+  </backend>
+  <outbound>
+    <base />
+    <choose>
+      <when condition="@(context.Response.StatusCode == 200)">
+        <set-body>@{
+            var r = context.Response.Body.As<JObject>();
+            var docs = (JArray)r["value"];
+            var chunks = new JArray();
+            foreach (var d in docs) {
+                chunks.Add(new JObject(
+                    new JProperty("chunk_no", d["chunk_no"]),
+                    new JProperty("heading", d["heading"]),
+                    new JProperty("version", d["version"]),
+                    new JProperty("chunk_id", d["chunk_id"])));
+            }
+            JToken first = docs.Count > 0 ? docs[0] : null;
+            return new JObject(
+                new JProperty("articleId", context.Request.MatchedParameters["articleId"]),
+                new JProperty("inIndex", docs.Count > 0),
+                new JProperty("title", first != null ? first["title"] : null),
+                new JProperty("version", first != null ? first["version"] : null),
+                new JProperty("status", first != null ? first["status"] : null),
+                new JProperty("lastPublished", first != null ? first["last_published"] : null),
+                new JProperty("chunkCount", docs.Count),
+                new JProperty("chunks", chunks)
+            ).ToString();
+        }</set-body>
+      </when>
+    </choose>
+  </outbound>
+  <on-error>
+    <base />
+  </on-error>
+</policies>

@@ -1,0 +1,32 @@
+{
+  "articleId": "KA-1011",
+  "version": 1,
+  "title": "Adult Dental Benefit Expansion (Effective 2027)",
+  "status": "published",
+  "category": "Benefits",
+  "lob": [
+    "Medicaid"
+  ],
+  "state": [
+    "TX",
+    "FL"
+  ],
+  "effectiveDate": "2027-01-01T00:00:00Z",
+  "expirationDate": "9999-12-31T23:59:59Z",
+  "url": "https://kms.example.internal/articles/KA-1011",
+  "publishedAt": "2026-10-01T00:00:00Z",
+  "chunks": [
+    {
+      "chunkNo": 1,
+      "heading": "What changes",
+      "text": "Starting January 1, 2027, adult Medicaid members receive an expanded preventive dental benefit with two cleanings and one set of X-rays per year at no cost.",
+      "embedText": "Adult Dental Benefit Expansion (Effective 2027) | What changes | Starting January 1, 2027, adult Medicaid members receive an expanded preventive dental benefit with two cleanings and one set of X-rays per year at no cost."
+    },
+    {
+      "chunkNo": 2,
+      "heading": "What to tell members now",
+      "text": "Until the effective date, adult dental coverage stays as it is today. Do not quote the new benefit before January 1, 2027.",
+      "embedText": "Adult Dental Benefit Expansion (Effective 2027) | What to tell members now | Until the effective date, adult dental coverage stays as it is today. Do not quote the new benefit before January 1, 2027."
+    }
+  ]
+}

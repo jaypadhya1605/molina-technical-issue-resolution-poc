@@ -1,0 +1,39 @@
+{
+  "articleId": "KA-1012",
+  "version": 5,
+  "title": "Flu Vaccine Outreach Script (2025-2026 Season)",
+  "status": "published",
+  "category": "Outreach",
+  "lob": [
+    "Medicaid",
+    "Medicare"
+  ],
+  "state": [
+    "CA",
+    "TX",
+    "FL",
+    "WA",
+    "OH",
+    "MI",
+    "NY",
+    "IL"
+  ],
+  "effectiveDate": "2025-09-01T00:00:00Z",
+  "expirationDate": "2026-06-30T23:59:59Z",
+  "url": "https://kms.example.internal/articles/KA-1012",
+  "publishedAt": "2026-10-01T00:00:00Z",
+  "chunks": [
+    {
+      "chunkNo": 1,
+      "heading": "Outreach script",
+      "text": "Thank the member for their time, explain that flu shots are covered at no cost at participating pharmacies and doctor offices, and offer to find the nearest pharmacy.",
+      "embedText": "Flu Vaccine Outreach Script (2025-2026 Season) | Outreach script | Thank the member for their time, explain that flu shots are covered at no cost at participating pharmacies and doctor offices, and offer to find the nearest pharmacy."
+    },
+    {
+      "chunkNo": 2,
+      "heading": "Incentive",
+      "text": "Members who get a flu shot by December 31 earn a reward on their rewards card. This script expires at the end of the 2025-2026 season.",
+      "embedText": "Flu Vaccine Outreach Script (2025-2026 Season) | Incentive | Members who get a flu shot by December 31 earn a reward on their rewards card. This script expires at the end of the 2025-2026 season."
+    }
+  ]
+}

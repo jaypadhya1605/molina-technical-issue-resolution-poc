@@ -1,0 +1,35 @@
+{
+  "articleId": "KA-1003",
+  "version": 4,
+  "title": "Non-Emergency Medical Transportation (NEMT)",
+  "status": "published",
+  "category": "Benefits",
+  "lob": [
+    "Medicaid"
+  ],
+  "state": [
+    "TX",
+    "CA",
+    "FL",
+    "OH",
+    "MI"
+  ],
+  "effectiveDate": "2026-10-30T00:00:00Z",
+  "expirationDate": "9999-12-31T23:59:59Z",
+  "url": "https://kms.example.internal/articles/KA-1003",
+  "publishedAt": "2026-10-01T00:00:00Z",
+  "chunks": [
+    {
+      "chunkNo": 1,
+      "heading": "Eligibility and scheduling (updated)",
+      "text": "Medicaid members with no other way to reach a covered appointment can use non-emergency medical transportation at no cost. Effective November 1, 2026, rides must be booked at least 3 business days ahead in the member app or through the transportation vendor line. Same-day rides remain available for hospital discharges and dialysis.",
+      "embedText": "Non-Emergency Medical Transportation (NEMT) | Eligibility and scheduling (updated) | Medicaid members with no other way to reach a covered appointment can use non-emergency medical transportation at no cost. Effective November 1, 2026, rides must be booked at least 3 business days ahead in the member app or through the transportation vendor line. Same-day rides remain available for hospital discharges and dialysis."
+    },
+    {
+      "chunkNo": 2,
+      "heading": "Reimbursement and complaints (updated)",
+      "text": "Mileage reimbursement requests are now submitted in the member portal within 90 days of the appointment. Missed or late rides are logged in CRM with category Transportation, and the vendor must respond within 48 hours.",
+      "embedText": "Non-Emergency Medical Transportation (NEMT) | Reimbursement and complaints (updated) | Mileage reimbursement requests are now submitted in the member portal within 90 days of the appointment. Missed or late rides are logged in CRM with category Transportation, and the vendor must respond within 48 hours."
+    }
+  ]
+}

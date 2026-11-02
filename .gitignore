@@ -1,0 +1,34 @@
+# Runtime evidence can contain caller identity and internal operational metadata.
+demo-evidence/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.sample
+*.log
+
+# Never commit certificate or private-key files.
+*.pem
+*.key
+*.crt
+*.cer
+*.der
+*.pfx
+*.p12
+*.p7b
+*.p7c
+*.jks
+*.keystore
+*.ppk
+*.asc
+*.gpg
+*.pgp
+*.csr
+*.kdbx
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+known_hosts*
+*_rsa
+authorized_keys

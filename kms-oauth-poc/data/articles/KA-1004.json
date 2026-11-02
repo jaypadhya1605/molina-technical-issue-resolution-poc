@@ -1,0 +1,46 @@
+{
+  "articleId": "KA-1004",
+  "version": 4,
+  "title": "Grievance vs. Appeal: How to Route the Caller",
+  "status": "published",
+  "category": "Appeals and Grievances",
+  "lob": [
+    "Medicaid",
+    "Medicare",
+    "Marketplace"
+  ],
+  "state": [
+    "CA",
+    "TX",
+    "FL",
+    "WA",
+    "OH",
+    "MI",
+    "NY",
+    "IL"
+  ],
+  "effectiveDate": "2025-03-01T00:00:00Z",
+  "expirationDate": "9999-12-31T23:59:59Z",
+  "url": "https://kms.example.internal/articles/KA-1004",
+  "publishedAt": "2026-10-01T00:00:00Z",
+  "chunks": [
+    {
+      "chunkNo": 1,
+      "heading": "Definitions",
+      "text": "A grievance is an expression of dissatisfaction about anything other than an adverse benefit determination, for example wait times, a rude provider or quality of care. An appeal is a request to review an adverse benefit determination such as a denied, reduced or terminated service.",
+      "embedText": "Grievance vs. Appeal: How to Route the Caller | Definitions | A grievance is an expression of dissatisfaction about anything other than an adverse benefit determination, for example wait times, a rude provider or quality of care. An appeal is a request to review an adverse benefit determination such as a denied, reduced or terminated service."
+    },
+    {
+      "chunkNo": 2,
+      "heading": "Filing timeframes",
+      "text": "Medicaid members must file an appeal within 60 calendar days of the notice date. Medicare members have 65 days. Expedited appeals are decided within 72 hours when waiting could seriously jeopardize the member's health.",
+      "embedText": "Grievance vs. Appeal: How to Route the Caller | Filing timeframes | Medicaid members must file an appeal within 60 calendar days of the notice date. Medicare members have 65 days. Expedited appeals are decided within 72 hours when waiting could seriously jeopardize the member's health."
+    },
+    {
+      "chunkNo": 3,
+      "heading": "How to log the case",
+      "text": "Create the case in CRM, record the member's concern in their own words, give the member the case number and confirm the mailing address for the acknowledgment letter. Never tell the member the outcome of an appeal on the call.",
+      "embedText": "Grievance vs. Appeal: How to Route the Caller | How to log the case | Create the case in CRM, record the member's concern in their own words, give the member the case number and confirm the mailing address for the acknowledgment letter. Never tell the member the outcome of an appeal on the call."
+    }
+  ]
+}

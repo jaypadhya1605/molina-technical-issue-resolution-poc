@@ -1,0 +1,43 @@
+{
+  "articleId": "KA-1006",
+  "version": 2,
+  "title": "Dual-Eligible Members: Coordination of Benefits",
+  "status": "published",
+  "category": "Eligibility",
+  "lob": [
+    "Medicare",
+    "MMP",
+    "Medicaid"
+  ],
+  "state": [
+    "CA",
+    "IL",
+    "MI",
+    "OH",
+    "TX"
+  ],
+  "effectiveDate": "2025-10-01T00:00:00Z",
+  "expirationDate": "9999-12-31T23:59:59Z",
+  "url": "https://kms.example.internal/articles/KA-1006",
+  "publishedAt": "2026-10-01T00:00:00Z",
+  "chunks": [
+    {
+      "chunkNo": 1,
+      "heading": "Who is dual-eligible",
+      "text": "Dual-eligible members have both Medicare and Medicaid. They may be enrolled in a dual special needs plan (D-SNP) or a Medicare-Medicaid plan (MMP) that coordinates both benefits under one card.",
+      "embedText": "Dual-Eligible Members: Coordination of Benefits | Who is dual-eligible | Dual-eligible members have both Medicare and Medicaid. They may be enrolled in a dual special needs plan (D-SNP) or a Medicare-Medicaid plan (MMP) that coordinates both benefits under one card."
+    },
+    {
+      "chunkNo": 2,
+      "heading": "Payer order",
+      "text": "Medicare pays first and Medicaid pays second for covered services. Qualified Medicare Beneficiaries (QMB) cannot be billed for Medicare deductibles, coinsurance or copays by any provider.",
+      "embedText": "Dual-Eligible Members: Coordination of Benefits | Payer order | Medicare pays first and Medicaid pays second for covered services. Qualified Medicare Beneficiaries (QMB) cannot be billed for Medicare deductibles, coinsurance or copays by any provider."
+    },
+    {
+      "chunkNo": 3,
+      "heading": "Balance billing complaints",
+      "text": "If a QMB member received a bill for cost sharing, tell the member they are not responsible for it, log a billing complaint in CRM and create a provider education referral so the provider stops billing the member.",
+      "embedText": "Dual-Eligible Members: Coordination of Benefits | Balance billing complaints | If a QMB member received a bill for cost sharing, tell the member they are not responsible for it, log a billing complaint in CRM and create a provider education referral so the provider stops billing the member."
+    }
+  ]
+}

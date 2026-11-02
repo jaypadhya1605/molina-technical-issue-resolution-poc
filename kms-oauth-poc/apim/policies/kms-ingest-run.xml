@@ -1,0 +1,161 @@
+<!--
+  POST /kms/ingest/run : the "pointer, not payload" pattern.
+  The KMS publisher has ALREADY written the article to ADLS Gen2 with its own managed identity (OAuth, no keys).
+  It sends only a tiny pointer here. The gateway:
+    - rejects anything larger than 8 KB with 413 (article bodies never travel through the gateway),
+    - whitelists the pointer fields and records them in the gateway log,
+    - starts the AI Search indexer, which PULLS the content from ADLS over a shared private link.
+-->
+<policies>
+  <inbound>
+    <base />
+    <set-variable name="maxPointerBytes" value="@(8192)" />
+    <set-variable name="declaredBytes" value="@{
+        long n;
+        return long.TryParse(context.Request.Headers.GetValueOrDefault("Content-Length", ""), out n) ? n : -1L;
+    }" />
+    <choose>
+      <when condition="@((long)context.Variables["declaredBytes"] > (int)context.Variables["maxPointerBytes"])">
+        <return-response>
+          <set-status code="413" reason="Payload Too Large" />
+          <set-header name="Content-Type" exists-action="override">
+            <value>application/json</value>
+          </set-header>
+          <set-body>@(new JObject(
+              new JProperty("error", "payload_too_large"),
+              new JProperty("receivedBytes", (long)context.Variables["declaredBytes"]),
+              new JProperty("maxBytes", (int)context.Variables["maxPointerBytes"]),
+              new JProperty("message", "Send a pointer, not the article. Write the article to ADLS Gen2 first, then POST {action, articleIds} here; Azure AI Search pulls the content over Private Link."),
+              new JProperty("requestId", context.RequestId.ToString())
+          ).ToString())</set-body>
+        </return-response>
+      </when>
+    </choose>
+    <set-variable name="pointerRaw" value="@(context.Request.Body != null ? context.Request.Body.As<string>(preserveContent: true) : "")" />
+    <set-variable name="pointerBytes" value="@(System.Text.Encoding.UTF8.GetByteCount((string)context.Variables["pointerRaw"]))" />
+    <choose>
+      <when condition="@((int)context.Variables["pointerBytes"] > (int)context.Variables["maxPointerBytes"])">
+        <return-response>
+          <set-status code="413" reason="Payload Too Large" />
+          <set-header name="Content-Type" exists-action="override">
+            <value>application/json</value>
+          </set-header>
+          <set-body>@(new JObject(
+              new JProperty("error", "payload_too_large"),
+              new JProperty("receivedBytes", (int)context.Variables["pointerBytes"]),
+              new JProperty("maxBytes", (int)context.Variables["maxPointerBytes"]),
+              new JProperty("message", "Send a pointer, not the article. Write the article to ADLS Gen2 first, then POST {action, articleIds} here; Azure AI Search pulls the content over Private Link."),
+              new JProperty("requestId", context.RequestId.ToString())
+          ).ToString())</set-body>
+        </return-response>
+      </when>
+    </choose>
+    <set-variable name="pointerError" value="@{
+        var raw = ((string)context.Variables["pointerRaw"]).Trim();
+        if (!raw.StartsWith("{") || !raw.EndsWith("}")) { return "Body must be a JSON object."; }
+        var p = JObject.Parse(raw);
+        var action = (string)p["action"] ?? "";
+        if (action != "publish" && action != "republish" && action != "unpublish") { return "action must be publish, republish or unpublish."; }
+        var ids = p["articleIds"] as JArray;
+        if (ids == null || ids.Count == 0 || ids.Count > 100) { return "articleIds must be an array of 1-100 article IDs."; }
+        foreach (var id in ids) {
+            if (id.Type != JTokenType.String || !Regex.IsMatch((string)id, "^[A-Za-z0-9-]{1,40}$")) { return "Invalid article ID: " + id.ToString(); }
+        }
+        return "";
+    }" />
+    <choose>
+      <when condition="@((string)context.Variables["pointerError"] != "")">
+        <return-response>
+          <set-status code="400" reason="Bad Request" />
+          <set-header name="Content-Type" exists-action="override">
+            <value>application/json</value>
+          </set-header>
+          <set-body>@(new JObject(
+              new JProperty("error", "invalid_pointer"),
+              new JProperty("message", (string)context.Variables["pointerError"]),
+              new JProperty("requestId", context.RequestId.ToString())
+          ).ToString())</set-body>
+        </return-response>
+      </when>
+    </choose>
+    <set-variable name="pointer" value="@{
+        var p = JObject.Parse((string)context.Variables["pointerRaw"]);
+        var jwt = (Jwt)context.Variables["jwt"];
+        var source = (string)p["source"] ?? "unspecified";
+        var correlationId = (string)p["correlationId"] ?? context.RequestId.ToString();
+        return new JObject(
+            new JProperty("action", (string)p["action"]),
+            new JProperty("articleIds", new JArray(((JArray)p["articleIds"]).Select(i => (string)i))),
+            new JProperty("source", source.Length > 64 ? source.Substring(0, 64) : source),
+            new JProperty("correlationId", correlationId.Length > 64 ? correlationId.Substring(0, 64) : correlationId),
+            new JProperty("requestedByObjectId", jwt.Claims.GetValueOrDefault("oid", "")),
+            new JProperty("requestedByAppId", jwt.Claims.GetValueOrDefault("azp", jwt.Claims.GetValueOrDefault("appid", ""))),
+            new JProperty("pointerBytes", (int)context.Variables["pointerBytes"]),
+            new JProperty("acceptedUtc", DateTime.UtcNow.ToString("o"))
+        ).ToString(Newtonsoft.Json.Formatting.None);
+    }" />
+    <trace source="kms-ingest-pointer" severity="information">
+      <message>@((string)context.Variables["pointer"])</message>
+    </trace>
+    <set-method>POST</set-method>
+    <set-body>@(string.Empty)</set-body>
+    <set-header name="Content-Type" exists-action="delete" />
+    <rewrite-uri template="/indexers/__INDEXER_NAME__/run" copy-unmatched-params="false" />
+    <set-query-parameter name="api-version" exists-action="override">
+      <value>__SEARCH_API_VERSION__</value>
+    </set-query-parameter>
+  </inbound>
+  <backend>
+    <base />
+  </backend>
+  <outbound>
+    <base />
+    <choose>
+      <when condition="@(context.Response.StatusCode == 202 || context.Response.StatusCode == 204)">
+        <set-status code="202" reason="Accepted" />
+        <set-header name="Content-Type" exists-action="override">
+          <value>application/json</value>
+        </set-header>
+        <set-body>@(new JObject(
+            new JProperty("status", "accepted"),
+            new JProperty("indexer", "__INDEXER_NAME__"),
+            new JProperty("pointer", JObject.Parse((string)context.Variables["pointer"])),
+            new JProperty("note", "Only this pointer crossed the gateway. Azure AI Search now pulls the article from ADLS Gen2 with its managed identity over a shared private link.")
+        ).ToString())</set-body>
+      </when>
+      <when condition="@(context.Response.StatusCode == 409)">
+        <set-header name="Content-Type" exists-action="override">
+          <value>application/json</value>
+        </set-header>
+        <set-header name="Retry-After" exists-action="override">
+          <value>15</value>
+        </set-header>
+        <set-body>@(new JObject(
+            new JProperty("status", "already-running"),
+            new JProperty("indexer", "__INDEXER_NAME__"),
+            new JProperty("message", "An indexer run is already in progress. Retry after it completes; change tracking picks up every blob written since the last run."),
+            new JProperty("pointer", JObject.Parse((string)context.Variables["pointer"]))
+        ).ToString())</set-body>
+      </when>
+    </choose>
+  </outbound>
+  <on-error>
+    <base />
+    <choose>
+      <when condition="@(context.LastError.Section == "inbound" && (context.LastError.Reason ?? "") == "ExpressionValueEvaluationFailure")">
+        <return-response>
+          <set-status code="400" reason="Bad Request" />
+          <set-header name="Content-Type" exists-action="override">
+            <value>application/json</value>
+          </set-header>
+          <set-body>@(new JObject(
+              new JProperty("error", "invalid_pointer"),
+              new JProperty("message", "The pointer body is not valid JSON."),
+              new JProperty("detail", context.LastError.Message),
+              new JProperty("requestId", context.RequestId.ToString())
+          ).ToString())</set-body>
+        </return-response>
+      </when>
+    </choose>
+  </on-error>
+</policies>

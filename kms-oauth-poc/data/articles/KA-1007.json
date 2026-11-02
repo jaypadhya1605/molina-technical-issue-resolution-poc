@@ -1,0 +1,41 @@
+{
+  "articleId": "KA-1007",
+  "version": 3,
+  "title": "Over-the-Counter (OTC) Benefit Card",
+  "status": "published",
+  "category": "Benefits",
+  "lob": [
+    "Medicare"
+  ],
+  "state": [
+    "CA",
+    "TX",
+    "FL",
+    "WA",
+    "OH"
+  ],
+  "effectiveDate": "2026-01-01T00:00:00Z",
+  "expirationDate": "9999-12-31T23:59:59Z",
+  "url": "https://kms.example.internal/articles/KA-1007",
+  "publishedAt": "2026-10-01T00:00:00Z",
+  "chunks": [
+    {
+      "chunkNo": 1,
+      "heading": "Quarterly allowance",
+      "text": "Eligible Medicare Advantage members receive a quarterly allowance on the OTC card. The amount depends on the plan. Unused balance does not roll over at the end of the quarter.",
+      "embedText": "Over-the-Counter (OTC) Benefit Card | Quarterly allowance | Eligible Medicare Advantage members receive a quarterly allowance on the OTC card. The amount depends on the plan. Unused balance does not roll over at the end of the quarter."
+    },
+    {
+      "chunkNo": 2,
+      "heading": "Where the card works",
+      "text": "The card works at participating retail stores and through the OTC catalog by phone or online. Eligible items include pain relievers, cold medicine, first aid supplies and vitamins.",
+      "embedText": "Over-the-Counter (OTC) Benefit Card | Where the card works | The card works at participating retail stores and through the OTC catalog by phone or online. Eligible items include pain relievers, cold medicine, first aid supplies and vitamins."
+    },
+    {
+      "chunkNo": 3,
+      "heading": "Lost card or balance questions",
+      "text": "Members can check the balance in the member portal or by calling the number on the back of the card. A replacement card ships in 7 to 10 days and the remaining balance transfers automatically.",
+      "embedText": "Over-the-Counter (OTC) Benefit Card | Lost card or balance questions | Members can check the balance in the member portal or by calling the number on the back of the card. A replacement card ships in 7 to 10 days and the remaining balance transfers automatically."
+    }
+  ]
+}

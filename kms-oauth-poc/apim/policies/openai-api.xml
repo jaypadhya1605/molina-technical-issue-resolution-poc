@@ -1,0 +1,74 @@
+<!--
+  API: azure-openai  (path /openai)  - the "AI gateway" in front of Azure OpenAI
+  Caller: Azure AI Search ONLY (embedding skill at index time, vectorizer at query time), using its managed identity.
+  1. OAuth: validate the Entra ID token and pin it to the AI Search managed identity (client application ID).
+  2. Least privilege: only the approved embedding deployment is exposed, so index and query vectors always use the same model.
+  3. Credential termination: APIM calls Azure OpenAI with its OWN managed identity over a private endpoint. No API keys exist.
+  4. Governance: per-caller token budget + a trace record for every call (Log Analytics: ApiManagementGatewayLogs).
+-->
+<policies>
+  <inbound>
+    <base />
+    <validate-azure-ad-token tenant-id="__TENANT_ID__" header-name="Authorization" failed-validation-httpcode="401" failed-validation-error-message="Unauthorized. An Entra ID token issued to the approved Azure AI Search managed identity is required." output-token-variable-name="jwt">
+      <client-application-ids>
+        <application-id>__SEARCH_MI_APP_ID__</application-id>
+      </client-application-ids>
+      <audiences>
+        <audience>https://cognitiveservices.azure.com</audience>
+        <audience>https://cognitiveservices.azure.com/</audience>
+      </audiences>
+    </validate-azure-ad-token>
+    <choose>
+      <when condition="@("{{kms-require-private-link}}".Equals("true", StringComparison.OrdinalIgnoreCase) && context.Request.PrivateEndpointConnection == null)">
+        <return-response>
+          <set-status code="403" reason="Forbidden" />
+          <set-header name="Content-Type" exists-action="override">
+            <value>application/json</value>
+          </set-header>
+          <set-body>{"error":"private_link_required","message":"This API only accepts traffic that arrives through an Azure Private Endpoint."}</set-body>
+        </return-response>
+      </when>
+      <when condition="@(context.Request.MatchedParameters["deployment-id"] != "__EMBEDDING_DEPLOYMENT__")">
+        <return-response>
+          <set-status code="403" reason="Forbidden" />
+          <set-header name="Content-Type" exists-action="override">
+            <value>application/json</value>
+          </set-header>
+          <set-body>{"error":"deployment_not_allowed","message":"Only the approved embedding deployment (__EMBEDDING_DEPLOYMENT__) is exposed by this gateway."}</set-body>
+        </return-response>
+      </when>
+    </choose>
+    <set-variable name="callerAppId" value="@{
+        var jwt = (Jwt)context.Variables["jwt"];
+        var appId = jwt.Claims.GetValueOrDefault("appid", "");
+        return appId != "" ? appId : jwt.Claims.GetValueOrDefault("azp", "unknown");
+    }" />
+    <azure-openai-token-limit counter-key="@((string)context.Variables["callerAppId"])" tokens-per-minute="1000000" estimate-prompt-tokens="false" tokens-consumed-variable-name="tokensConsumed" remaining-tokens-variable-name="remainingTokens" />
+    <set-backend-service base-url="__AOAI_ENDPOINT__openai" />
+    <authentication-managed-identity resource="https://cognitiveservices.azure.com" />
+    <set-header name="api-key" exists-action="delete" />
+  </inbound>
+  <backend>
+    <base />
+  </backend>
+  <outbound>
+    <base />
+    <set-header name="x-kms-gateway" exists-action="override">
+      <value>azure-api-management</value>
+    </set-header>
+    <trace source="kms-ai-gateway" severity="information">
+      <message>@(new JObject(
+          new JProperty("event", "embedding"),
+          new JProperty("callerAppId", (string)context.Variables["callerAppId"]),
+          new JProperty("callerObjectId", ((Jwt)context.Variables["jwt"]).Claims.GetValueOrDefault("oid", "")),
+          new JProperty("deployment", context.Request.MatchedParameters["deployment-id"]),
+          new JProperty("viaPrivateEndpoint", context.Request.PrivateEndpointConnection != null),
+          new JProperty("backendStatus", context.Response.StatusCode),
+          new JProperty("tokensConsumed", context.Variables.GetValueOrDefault<int>("tokensConsumed", -1))
+      ).ToString(Newtonsoft.Json.Formatting.None))</message>
+    </trace>
+  </outbound>
+  <on-error>
+    <base />
+  </on-error>
+</policies>

@@ -1,0 +1,39 @@
+<!--
+  POST /kms/search : hybrid + semantic search (body = AI Search query JSON).
+  Guardrail enforced by the gateway, not by the client: only published, currently effective articles are ever returned.
+-->
+<policies>
+  <inbound>
+    <base />
+    <set-variable name="nowUtc" value="@(DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"))" />
+    <set-variable name="guardrail" value="@("status eq 'published' and effective_date le " + (string)context.Variables["nowUtc"] + " and (expiration_date eq null or expiration_date gt " + (string)context.Variables["nowUtc"] + ")")" />
+    <set-body>@{
+        JObject body = null;
+        if (context.Request.Body != null) { body = context.Request.Body.As<JObject>(preserveContent: true); }
+        if (body == null) { body = new JObject(new JProperty("search", "*")); }
+        var userFilter = (string)body["filter"];
+        var guard = (string)context.Variables["guardrail"];
+        body["filter"] = string.IsNullOrWhiteSpace(userFilter) ? guard : "(" + userFilter + ") and " + guard;
+        return body.ToString();
+    }</set-body>
+    <set-header name="Content-Type" exists-action="override">
+      <value>application/json</value>
+    </set-header>
+    <rewrite-uri template="/indexes/__INDEX_NAME__/docs/search" copy-unmatched-params="false" />
+    <set-query-parameter name="api-version" exists-action="override">
+      <value>__SEARCH_API_VERSION__</value>
+    </set-query-parameter>
+  </inbound>
+  <backend>
+    <base />
+  </backend>
+  <outbound>
+    <base />
+    <set-header name="x-kms-guardrail" exists-action="override">
+      <value>@((string)context.Variables["guardrail"])</value>
+    </set-header>
+  </outbound>
+  <on-error>
+    <base />
+  </on-error>
+</policies>

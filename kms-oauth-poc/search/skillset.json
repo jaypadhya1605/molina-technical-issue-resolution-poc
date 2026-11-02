@@ -1,0 +1,52 @@
+{
+  "name": "__SKILLSET_NAME__",
+  "description": "Keeps KMS custom chunking. The built-in Azure OpenAI embedding skill calls the APIM AI gateway (not Azure OpenAI directly) with the search service managed identity. Index projections write one search document per chunk and clean up orphaned chunks on republish.",
+  "skills": [
+    {
+      "@odata.type": "#Microsoft.Skills.Text.AzureOpenAIEmbeddingSkill",
+      "name": "embed-chunks-via-apim",
+      "description": "Embeddings through Azure API Management (validate-azure-ad-token + managed identity to Azure OpenAI).",
+      "context": "/document/chunks/*",
+      "resourceUri": "__APIM_GATEWAY_URL__",
+      "deploymentId": "__EMBEDDING_DEPLOYMENT__",
+      "modelName": "text-embedding-3-large",
+      "dimensions": 3072,
+      "inputs": [
+        { "name": "text", "source": "/document/chunks/*/embedText" }
+      ],
+      "outputs": [
+        { "name": "embedding", "targetName": "vector" }
+      ]
+    }
+  ],
+  "indexProjections": {
+    "selectors": [
+      {
+        "targetIndexName": "__INDEX_NAME__",
+        "parentKeyFieldName": "parent_id",
+        "sourceContext": "/document/chunks/*",
+        "mappings": [
+          { "name": "content", "source": "/document/chunks/*/text" },
+          { "name": "heading", "source": "/document/chunks/*/heading" },
+          { "name": "chunk_no", "source": "/document/chunks/*/chunkNo" },
+          { "name": "content_vector", "source": "/document/chunks/*/vector" },
+          { "name": "article_id", "source": "/document/articleId" },
+          { "name": "title", "source": "/document/title" },
+          { "name": "category", "source": "/document/category" },
+          { "name": "lob", "source": "/document/lob" },
+          { "name": "state", "source": "/document/state" },
+          { "name": "effective_date", "source": "/document/effectiveDate" },
+          { "name": "expiration_date", "source": "/document/expirationDate" },
+          { "name": "status", "source": "/document/status" },
+          { "name": "version", "source": "/document/version" },
+          { "name": "url", "source": "/document/url" },
+          { "name": "last_published", "source": "/document/publishedAt" },
+          { "name": "source_path", "source": "/document/metadata_storage_path" }
+        ]
+      }
+    ],
+    "parameters": {
+      "projectionMode": "skipIndexingParentDocuments"
+    }
+  }
+}
